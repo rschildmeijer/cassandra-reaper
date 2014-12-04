@@ -1,5 +1,7 @@
 package com.spotify.reaper.core;
 
+import com.google.common.collect.Range;
+
 import org.joda.time.DateTime;
 
 import java.math.BigInteger;
@@ -8,11 +10,9 @@ public class RepairSegment {
   private Long id;
   private final ColumnFamily columnFamily;
   private final long runID;
-  private final BigInteger startToken; // open/exclusive
-  private final BigInteger endToken; // closed/inclusive
+  private final Range<BigInteger> tokenRange;
   private final State state;
-  private final DateTime startTime;
-  private final DateTime endTime;
+  private final Range<DateTime> timeRange;
 
   public Long getId() {
     return id;
@@ -31,11 +31,11 @@ public class RepairSegment {
   }
 
   public BigInteger getStartToken() {
-    return startToken;
+    return tokenRange.lowerEndpoint();
   }
 
   public BigInteger getEndToken() {
-    return endToken;
+    return tokenRange.upperEndpoint();
   }
 
   public State getState() {
@@ -43,11 +43,11 @@ public class RepairSegment {
   }
 
   public DateTime getStartTime() {
-    return startTime;
+    return timeRange.lowerEndpoint();
   }
 
   public DateTime getEndTime() {
-    return endTime;
+    return timeRange.upperEndpoint();
   }
 
   public enum State {
@@ -60,11 +60,9 @@ public class RepairSegment {
     this.id = builder.id;
     this.columnFamily = builder.columnFamily;
     this.runID = builder.runID;
-    this.startToken = builder.startToken;
-    this.endToken = builder.endToken;
+    this.tokenRange = Range.openClosed(builder.startToken, builder.endToken);
     this.state = builder.state;
-    this.startTime = builder.startTime;
-    this.endTime = builder.endTime;
+    this.timeRange = Range.closed(builder.startTime, builder.endTime);
   }
 
 
@@ -127,6 +125,6 @@ public class RepairSegment {
 
   @Override
   public String toString() {
-    return String.format("(%s,%s]", startToken.toString(), endToken.toString());
+    return String.format("(%s,%s]", tokenRange.lowerEndpoint().toString(), tokenRange.upperEndpoint().toString());
   }
 }
